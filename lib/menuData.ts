@@ -57,7 +57,7 @@ export const seaFishItems: MenuItem[] = [
     nameLocal: "Raavas / Threadfin Salmon",
     category: "fish",
     section: "sea",
-    image: "https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=500&h=350&fit=crop&auto=format",
+    image: "https://static.freshtohome.com/media/catalog/product/i/n/indian-salmon_1.jpg",
     desc: "Rich, oily fish loaded with omega-3. Great for fry, curry & steaming",
     packs: [
       { grams: 500,  label: "500 g", mrp: 749,  price: 524 },
