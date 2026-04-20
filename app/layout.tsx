@@ -7,7 +7,7 @@ import CartDrawer from "@/components/CartDrawer";
 import { CartProvider } from "@/lib/cartContext";
 
 export const metadata: Metadata = {
-  title: "Ocean Fish and Chicken on Wheels",
+  title: "Costal Fresh Fish & Chicken",
   description: "Fresh fish and chicken delivered to your doorstep. 20% cheaper than Licious & FreshToHome!",
 };
 

@@ -9,12 +9,24 @@ function buildWhatsAppMessage(
 ): string {
   const lines: string[] = ["Hi! I'd like to place an order:\n"];
 
-  const fish    = cart.filter((c) => c.item.category === "fish");
-  const chicken = cart.filter((c) => c.item.category === "chicken");
+  const seaFish   = cart.filter((c) => c.item.section === "sea");
+  const freshFish = cart.filter((c) => c.item.section === "freshwater");
+  const chicken   = cart.filter((c) => c.item.category === "chicken");
 
-  if (fish.length) {
-    lines.push("🐟 *Fish:*");
-    fish.forEach((c) => {
+  if (seaFish.length) {
+    lines.push("🌊 *Ocean & Sea Fish:*");
+    seaFish.forEach((c) => {
+      const lineTotal = c.pack.price * c.count;
+      lines.push(
+        `• ${c.item.name} — ${c.pack.label} × ${c.count} pack${c.count > 1 ? "s" : ""} = ₹${lineTotal}`
+      );
+    });
+    lines.push("");
+  }
+
+  if (freshFish.length) {
+    lines.push("🏞️ *River & Pond Fish:*");
+    freshFish.forEach((c) => {
       const lineTotal = c.pack.price * c.count;
       lines.push(
         `• ${c.item.name} — ${c.pack.label} × ${c.count} pack${c.count > 1 ? "s" : ""} = ₹${lineTotal}`

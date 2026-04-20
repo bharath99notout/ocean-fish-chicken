@@ -12,8 +12,8 @@ export default function Footer() {
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
               <span style={{ fontSize: 28 }}>🐟</span>
               <div>
-                <div style={{ fontWeight: 800, fontSize: 15, color: "white" }}>Ocean Fish &amp; Chicken</div>
-                <div style={{ fontSize: 11, color: "#7dd3fc", letterSpacing: 2 }}>ON WHEELS</div>
+                <div style={{ fontWeight: 800, fontSize: 15, color: "white" }}>Costal Fresh Fish &amp; Chicken</div>
+                <div style={{ fontSize: 11, color: "#7dd3fc", letterSpacing: 2 }}>FRESH DAILY</div>
               </div>
             </div>
             <p style={{ fontSize: 14, lineHeight: 1.7, color: "#94a3b8" }}>
@@ -52,7 +52,7 @@ export default function Footer() {
         </div>
 
         <div style={{ borderTop: "1px solid #1e3a4e", paddingTop: 20, textAlign: "center", fontSize: 13, color: "#475569" }}>
-          © 2025 Ocean Fish &amp; Chicken on Wheels. All rights reserved.
+          © 2026 Costal Fresh Fish &amp; Chicken. All rights reserved.
         </div>
       </div>
     </footer>

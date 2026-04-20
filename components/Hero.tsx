@@ -19,9 +19,9 @@ export default function Hero() {
       <div style={{ maxWidth: 700, margin: "0 auto", position: "relative" }}>
         <div style={{ fontSize: 64, marginBottom: 16 }}>🐟🍗</div>
         <h1 style={{ fontSize: "clamp(28px, 6vw, 52px)", fontWeight: 900, lineHeight: 1.2, marginBottom: 16 }}>
-          Ocean Fish &amp; Chicken
+          Costal Fresh Fish &amp; Chicken
           <span style={{ display: "block", color: "#7dd3fc", fontSize: "clamp(16px, 3vw, 24px)", fontWeight: 600, marginTop: 8, letterSpacing: 3 }}>
-            ON WHEELS
+            FRESH DAILY
           </span>
         </h1>
 

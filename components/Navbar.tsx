@@ -15,8 +15,8 @@ export default function Navbar() {
         <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
           <span style={{ fontSize: 28 }}>🐟</span>
           <div>
-            <div style={{ fontWeight: 800, fontSize: 16, color: "white", lineHeight: 1.2 }}>Ocean Fish &amp; Chicken</div>
-            <div style={{ fontSize: 11, color: "#7dd3fc", letterSpacing: 1 }}>ON WHEELS</div>
+            <div style={{ fontWeight: 800, fontSize: 16, color: "white", lineHeight: 1.2 }}>Costal Fresh Fish &amp; Chicken</div>
+            <div style={{ fontSize: 11, color: "#7dd3fc", letterSpacing: 1 }}>FRESH DAILY</div>
           </div>
         </Link>
 
