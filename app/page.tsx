@@ -2,6 +2,7 @@ import Hero from "@/components/Hero";
 import MenuPreview from "@/components/MenuPreview";
 import WhyUs from "@/components/WhyUs";
 import OrderSteps from "@/components/OrderSteps";
+import StoresSection from "@/components/StoresSection";
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
       <WhyUs />
       <MenuPreview />
       <OrderSteps />
+      <StoresSection />
     </>
   );
 }
