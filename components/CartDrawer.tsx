@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 const PHONE = "6366007222";
 
+
 function buildWhatsAppMessage(cart: CartItem[], total: number, address: string): string {
   const lines: string[] = ["Hi! I'd like to place an order from *Costal Fresh Fish & Chicken*:\n"];
 
@@ -72,11 +73,49 @@ export default function CartDrawer() {
   const [addressError, setAddressError] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"cod" | "phonepe">("phonepe");
   const [loading, setLoading] = useState(false);
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount: number; label: string } | null>(null);
+  const [promoError, setPromoError] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
   const router = useRouter();
 
   if (!isOpen) return null;
 
-  const totalSavings = cart.reduce((s, c) => s + (c.pack.mrp - c.pack.price) * c.count, 0);
+  const totalSavings  = cart.reduce((s, c) => s + (c.pack.mrp - c.pack.price) * c.count, 0);
+  const promoDiscount = appliedPromo?.discount ?? 0;
+  const finalTotal    = totalPrice - promoDiscount;
+
+  const handleApplyPromo = async () => {
+    const code = promoInput.trim().toUpperCase();
+    if (!code) return;
+    setPromoLoading(true);
+    try {
+      const res  = await fetch("/api/promo/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, cartTotal: totalPrice }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setAppliedPromo({ code, discount: data.discount, label: data.label });
+        setPromoError("");
+        setPromoInput("");
+      } else {
+        setPromoError(data.error ?? "Invalid promo code");
+        setAppliedPromo(null);
+      }
+    } catch {
+      setPromoError("Could not validate code. Try again.");
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoError("");
+    setPromoInput("");
+  };
 
   const handleSendOrder = async () => {
     if (!address.trim()) {
@@ -84,13 +123,21 @@ export default function CartDrawer() {
       return;
     }
 
+    const promoNote = appliedPromo
+      ? `\n🏷️ *Promo: ${appliedPromo.code}* (-₹${promoDiscount})`
+      : "";
+
     if (paymentMethod === "cod") {
-      const msg = buildWhatsAppMessage(cart, totalPrice, address);
+      const msg = buildWhatsAppMessage(cart, finalTotal, address);
       const codMsg = msg.replace(
         encodeURIComponent("Please confirm availability, delivery time & payment. Thank you! 🙏"),
-        encodeURIComponent("💵 *Payment: Cash on Delivery*\n\nPlease confirm availability & delivery time. Thank you! 🙏")
+        encodeURIComponent(`${promoNote}\n💵 *Payment: Cash on Delivery*\n\nPlease confirm availability & delivery time. Thank you! 🙏`.trimStart())
       );
       window.open(`https://wa.me/91${PHONE}?text=${codMsg}`, "_blank");
+      clearCart();
+      setIsOpen(false);
+      setAddress("");
+      setAppliedPromo(null);
       return;
     }
 
@@ -103,7 +150,7 @@ export default function CartDrawer() {
       // Save order to localStorage so success page can display it
       localStorage.setItem(`order_${orderId}`, JSON.stringify({
         orderId,
-        amount: totalPrice,
+        amount: finalTotal,
         items: buildItemsSummary(cart),
         address: address.trim(),
         phone,
@@ -113,7 +160,7 @@ export default function CartDrawer() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount:  totalPrice,
+          amount:  finalTotal,
           orderId,
           phone,
           items:   buildItemsSummary(cart),
@@ -325,20 +372,94 @@ export default function CartDrawer() {
             </div>
 
             <div style={{ padding: "12px 16px" }}>
+              {/* Promo Code */}
+              <div style={{ marginBottom: 12 }}>
+                {appliedPromo ? (
+                  <div style={{
+                    background: "#f0fdf4", border: "1.5px solid #86efac",
+                    borderRadius: 10, padding: "10px 12px",
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                  }}>
+                    <div>
+                      <span style={{ fontSize: 13, fontWeight: 800, color: "#15803d" }}>
+                        🏷️ {appliedPromo.code}
+                      </span>
+                      <span style={{ fontSize: 12, color: "#16a34a", marginLeft: 8 }}>
+                        {appliedPromo.label} applied!
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleRemovePromo}
+                      style={{ background: "none", border: "none", color: "#ef4444", cursor: "pointer", fontSize: 18, fontWeight: 700, padding: "0 4px" }}
+                    >✕</button>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <input
+                        value={promoInput}
+                        onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoError(""); }}
+                        onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+                        placeholder="Enter promo code"
+                        style={{
+                          flex: 1, padding: "9px 12px", borderRadius: 10,
+                          border: promoError ? "2px solid #ef4444" : "2px solid #e2e8f0",
+                          fontSize: 13, fontWeight: 700, color: "#1e293b",
+                          outline: "none", letterSpacing: 1,
+                          background: promoError ? "#fff5f5" : "white",
+                        }}
+                      />
+                      <button
+                        onClick={handleApplyPromo}
+                        disabled={promoLoading}
+                        style={{
+                          padding: "9px 16px", borderRadius: 10,
+                          background: promoLoading ? "#94a3b8" : "#0c4a6e", color: "white",
+                          border: "none", cursor: promoLoading ? "not-allowed" : "pointer",
+                          fontWeight: 700, fontSize: 13, minWidth: 70,
+                        }}
+                      >{promoLoading ? "..." : "Apply"}</button>
+                    </div>
+                    {promoError && (
+                      <p style={{ color: "#ef4444", fontSize: 12, margin: "4px 0 0", fontWeight: 600 }}>
+                        ⚠️ {promoError}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* Savings */}
               <div style={{
                 background: "#dcfce7", borderRadius: 10,
-                padding: "8px 14px", marginBottom: 10,
+                padding: "8px 14px", marginBottom: 6,
                 display: "flex", justifyContent: "space-between", alignItems: "center",
               }}>
                 <span style={{ fontSize: 13, color: "#15803d", fontWeight: 600 }}>🎉 You save vs Licious</span>
                 <span style={{ fontWeight: 800, fontSize: 14, color: "#15803d" }}>₹{totalSavings}</span>
               </div>
 
+              {/* Promo discount row */}
+              {promoDiscount > 0 && (
+                <div style={{
+                  background: "#f0fdf4", borderRadius: 10,
+                  padding: "8px 14px", marginBottom: 6,
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                }}>
+                  <span style={{ fontSize: 13, color: "#15803d", fontWeight: 600 }}>🏷️ Promo discount</span>
+                  <span style={{ fontWeight: 800, fontSize: 14, color: "#15803d" }}>−₹{promoDiscount}</span>
+                </div>
+              )}
+
               {/* Total */}
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, alignItems: "center" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 12, alignItems: "center", marginTop: 8 }}>
                 <span style={{ fontSize: 16, fontWeight: 700, color: "#1e293b" }}>Total Amount</span>
-                <span style={{ fontSize: 24, fontWeight: 900, color: "#0c4a6e" }}>₹{totalPrice}</span>
+                <div style={{ textAlign: "right" }}>
+                  {promoDiscount > 0 && (
+                    <div style={{ fontSize: 13, color: "#94a3b8", textDecoration: "line-through" }}>₹{totalPrice}</div>
+                  )}
+                  <span style={{ fontSize: 24, fontWeight: 900, color: "#0c4a6e" }}>₹{finalTotal}</span>
+                </div>
               </div>
 
               {/* Payment Method Selector */}
@@ -407,12 +528,12 @@ export default function CartDrawer() {
 
               {paymentMethod === "cod" && (
                 <p style={{ fontSize: 11, color: "#64748b", margin: "8px 0 0", textAlign: "center" }}>
-                  Order sent via WhatsApp • Pay cash at delivery
+                  Order sent via WhatsApp • Pay ₹{finalTotal} cash at delivery
                 </p>
               )}
               {paymentMethod === "phonepe" && (
                 <p style={{ fontSize: 11, color: "#64748b", margin: "8px 0 0", textAlign: "center" }}>
-                  Secure payment via PhonePe • UPI / Cards / Wallets
+                  Secure payment of ₹{finalTotal} via PhonePe • UPI / Cards / Wallets
                 </p>
               )}
             </div>
